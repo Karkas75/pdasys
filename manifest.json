@@ -1,0 +1,39 @@
+{
+  "name": "Σύστημα PDA Εστιατορίου",
+  "short_name": "PDA",
+  "description": "Σύστημα διαχείρισης τραπεζιών και παραγγελιών εστιατορίου - Λειτουργεί offline",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#000000",
+  "theme_color": "#000000",
+  "prefer_related_applications": false,
+  "icons": [
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect fill='%23000' width='192' height='192'/><text x='50%' y='50%' font-size='80' fill='%23fff' text-anchor='middle' dominant-baseline='central' font-family='Arial'>PDA</text></svg>",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect fill='%23000' width='512' height='512'/><text x='50%' y='50%' font-size='200' fill='%23fff' text-anchor='middle' dominant-baseline='central' font-family='Arial'>PDA</text></svg>",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["productivity", "utilities"],
+  "screenshots": [
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 540 720'><rect fill='%230a0a0a' width='540' height='720'/><rect fill='%23000' width='540' height='80'/><text x='270' y='40' font-size='24' fill='%23fff' text-anchor='middle' dominant-baseline='central' font-family='Arial'>PDA System</text></svg>",
+      "sizes": "540x720",
+      "type": "image/svg+xml",
+      "form_factor": "narrow"
+    }
+  ]
+}
+      "form_factor": "narrow"
+    }
+  ]
+}

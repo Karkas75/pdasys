@@ -1,0 +1,125 @@
+
+<!DOCTYPE html>
+<html lang="el">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#000000">
+<meta name="description" content="Σύστημα διαχείρισης τραπεζιών και παραγγελιών εστιατορίου">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="PDA">
+<title>Σύστημα PDA Εστιατορίου</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect fill='%23000' width='192' height='192'/><text x='50%' y='50%' font-size='80' fill='%23fff' text-anchor='middle' dominant-baseline='central' font-family='Arial'>PDA</text></svg>">
+<link rel="stylesheet" href="style.css">
+<script src="/socket.io/socket.io.js"></script>
+</head>
+<body>
+<header>
+    PDA
+    <div style="display: flex; align-items: center; gap: 8px;">
+        <div id="onlineIndicator"></div>
+        <div id="statusText">Online</div>
+    </div>
+</header>
+
+<!-- Login -->
+<div id="loginScreen" class="login">
+    <h2>Σύνδεση Σερβιτόρου</h2>
+    <input type="text" id="username" placeholder="Όνομα χρήστη">
+    <input type="password" id="password" placeholder="Κωδικός">
+    <button onclick="login()">Σύνδεση</button>
+</div>
+
+<div id="app">
+<div class="container">
+    <div class="tables-section">
+        <div class="tables" id="tables"></div>
+        <div id="tableBottomButtons" style="display:flex; gap:8px; margin-top:12px;">
+            <button onclick="openCashierMenu()" class="cashierBtn" id="cashierBtn">💰 Ταμείο: 0€</button>
+            <button onclick="logout()" class="logoutBtn">🚪 Αποσύνδεση</button>
+        </div>
+    </div>
+
+    <div class="panel">
+        <h3 id="currentTable">Επιλέξτε Τραπέζι</h3>
+        <div id="waiterName"></div>
+
+        <!-- Live Monitor Panel (Owner Only) -->
+        <div id="liveMonitorPanel" style="display:none;">
+            <h2 style="color: #00d9ff; text-align: center; margin-bottom: 20px;">📡 Live Monitor Ταμείου</h2>
+            <button onclick="back()" style="width:100%; padding:12px; margin-bottom:15px; background:#444; border:none; color:#fff; border-radius:8px; cursor:pointer;">← Πίσω</button>
+            <div id="liveMonitorContent" style="display:flex; flex-direction:column; gap:10px; max-height:600px; overflow-y:auto;">
+                <p style="color:#888; text-align:center; padding:20px;">Αναμονή για κλεισίματα ταμείου...</p>
+            </div>
+        </div>
+
+        <!-- Cashier Panel -->
+        <div id="cashierPanel" style="display:none;">
+            <h2 style="color: #ffa500; text-align: center;">💰 Ταμείο Βάρδιας</h2>
+            <div style="background:rgba(255, 165, 0, 0.1); padding:20px; border-radius:8px; margin:20px 0; border: 2px solid #ffa500;">
+                <p style="color: #aaa; text-align: center; margin: 0 0 10px 0;">Συνολικό Ποσό:</p>
+                <p style="color: #00ff88; text-align: center; font-size: 36px; font-weight:700; margin: 0;" id="totalCashierAmount">0€</p>
+            </div>
+            <button id="viewHistoryBtn" onclick="viewCashierHistory()" style="display:none; width:100%; padding:12px; margin:10px 0; background:linear-gradient(135deg, #1a3a3a 0%, #0f2a2a 100%); border:2px solid #00d9ff; color:#00d9ff; border-radius:8px; cursor:pointer; font-weight:700;">📊 Ιστορικό Ταμείου</button>
+            <button id="liveMonitorBtn" onclick="openLiveMonitor()" style="display:none; width:100%; padding:12px; margin:10px 0; background:linear-gradient(135deg, #1a3a3a 0%, #0f2a2a 100%); border:2px solid #00d9ff; color:#00d9ff; border-radius:8px; cursor:pointer; font-weight:700;">📡 Live Monitor</button>
+            <button onclick="closeCashierSession()" style="width:100%; padding:12px; margin:10px 0; background:linear-gradient(135deg, #ff3333 0%, #cc0000 100%); border:2px solid #ff4444; color:#fff; border-radius:8px; cursor:pointer; font-weight:700;">✓ Κλείσιμο Ταμείου</button>
+            <button onclick="back()" style="width:100%; padding:12px; margin:10px 0; background:#444; border:none; color:#fff; border-radius:8px; cursor:pointer;">← Πίσω</button>
+        </div>
+
+        <!-- Orders Panel -->
+        <div id="ordersPanel" style="display:none;">
+            <button onclick="back()" style="margin-bottom:10px;">← Πίσω</button>
+            
+            <div class="controls" id="controlsPanel" style="display:none;">
+                <button onclick="openTable()">Άνοιγμα</button>
+                <button onclick="closeTable()">Κλείσιμο</button>
+                <button onclick="pay('cash')">Μετρητά</button>
+                <button onclick="pay('card')">Κάρτα</button>
+                <button onclick="transferTable()">Μεταφορά</button>
+            </div>
+
+            <div id="adminMenu" style="display:none; margin-top:15px; padding: 10px; background:#1a1a1a; border: 1px solid #444; border-radius:6px;">
+                <h4>Admin Επιλογές</h4>
+                <button onclick="viewTableStats()">Στατιστικά</button>
+                <button onclick="clearTableOrders()">Καθάρισμα Παραγγελιών</button>
+                <button onclick="lockTable()">Κλείδωμα</button>
+            </div>
+
+            <h4 id="categoriesTitle" style="display:none; margin-top:15px;">Κατηγορίες</h4>
+            <div class="categories" id="categoriesPanel" style="display:none;">
+                <button onclick="loadCategory('food')">Φαγητό</button>
+                <button onclick="loadCategory('wine')">Κρασί</button>
+                <button onclick="loadCategory('beer')">Μπύρα</button>
+                <button onclick="loadCategory('juice')">Χυμοί</button>
+            </div>
+
+            <div class="items" id="items"></div>
+
+            <div class="orders" style="display:none;" id="ordersPanelContent">
+                <h4>Παραγγελίες</h4>
+                <ul id="orderList"></ul>
+                <h3 id="total">Σύνολο: 0€</h3>
+                <button id="sendOrderBtn" onclick="sendOrder()" style="margin-top:10px; background:#33cc33; color:#000; font-weight:bold; width:100%;">Αποστολή Παραγγελίας</button>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+
+<div class="notification" id="notification"></div>
+
+<script src="script.js"></script>
+<script>
+// Register Service Worker
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js').then(registration => {
+    console.log('Service Worker registered:', registration);
+  }).catch(error => {
+    console.log('Service Worker registration failed:', error);
+  });
+}
+</script>
+</body>
+</html>
